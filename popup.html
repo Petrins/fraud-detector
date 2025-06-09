@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Virtuālais Krāpnieks</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 380px;
+    min-height: 500px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+    color: #e0e0e0;
+    line-height: 1.5;
+    overflow-x: hidden;
+    animation: slideIn 0.3s ease-out;
+  }
+  
+  @keyframes slideIn {
+    from { 
+      opacity: 0; 
+      transform: translateY(-10px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0); 
+    }
+  }
+  
+  header {
+    background: linear-gradient(135deg, #1e8100 0%, #029b02 50%, #34a853 100%);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+    opacity: 0.3;
+  }
+  
+  .header-content {
+    position: relative;
+    z-index: 2;
+  }
+  
+  h2 {
+    margin: 0 0 8px 0;
+    font-weight: 700;
+    font-size: 20px;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  
+  h2::before {
+    content: "🛡️";
+    font-size: 24px;
+    margin-right: 12px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  }
+  
+  .header-subtitle {
+    font-size: 13px;
+    color: rgba(255,255,255,0.9);
+    font-weight: 400;
+    margin: 0;
+  }
+  
+  .status-indicator {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #34a853;
+    box-shadow: 0 0 0 3px rgba(52, 168, 83, 0.3);
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(52, 168, 83, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(52, 168, 83, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(52, 168, 83, 0); }
+  }
+  
+  h4 {
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 600;
+    margin: 20px 0 12px 0;
+    display: flex;
+    align-items: center;
+  }
+  
+  h4 i {
+    margin-right: 8px;
+    width: 16px;
+    text-align: center;
+  }
+  
+  .tabs {
+    display: flex;
+    background: #000000;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 0 4px;
+  }
+  
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 12px 8px;
+    cursor: pointer;
+    color: #888888;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    position: relative;
+    letter-spacing: 0.01em;
+  }
+  
+  .tab.active {
+    color: #ffffff;
+    font-weight: 600;
+  }
+  
+  .tab.active::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 20%;
+    width: 60%;
+    height: 2px;
+    background: #ffffff;
+    border-radius: 2px 2px 0 0;
+  }
+  
+  .tab:hover:not(.active) {
+    color: #cccccc;
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  .panel {
+    display: none;
+    padding: 20px;
+    background: #111111;
+  }
+  
+  .panel.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  .toggle {
+    margin-bottom: 20px;
+    background: #1a1a1a;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+  }
+  
+  .toggle label {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    user-select: none;
+  }
+  
+  .toggle input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 44px;
+    height: 22px;
+    background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+    border-radius: 30px;
+    position: relative;
+    margin-right: 12px;
+    outline: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+  }
+  
+  .toggle input[type="checkbox"]:checked {
+    background: linear-gradient(135deg, #34a853 0%, #2e7d32 100%);
+    border-color: transparent;
+    box-shadow: 0 0 0 2px rgba(52, 168, 83, 0.3), inset 0 2px 4px rgba(0,0,0,0.2);
+  }
+  
+  .toggle input[type="checkbox"]::before {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    top: 1px;
+    left: 2px;
+    background: linear-gradient(135deg, #888888 0%, #666666 100%);
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  
+  .toggle input[type="checkbox"]:checked::before {
+    left: 24px;
+    background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+  
+  .list {
+    max-height: 120px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+    background: #1a1a1a;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 2px;
+  }
+  
+  .list::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 4px;
+  }
+  
+  .list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+  }
+  
+  .item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 13px;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+    margin: 2px;
+  }
+  
+  .item:hover {
+    background: rgba(255, 255, 255, 0.03);
+    transform: translateX(2px);
+  }
+  
+  .item:last-child {
+    border-bottom: none;
+  }
+  
+  .item .remove {
+    color: #666666;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    padding: 4px;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .item .remove:hover {
+    color: #ff4d4f;
+    background: rgba(244, 67, 54, 0.1);
+    transform: scale(1.1);
+  }
+  
+  .input-group {
+    display: flex;
+    margin-bottom: 20px;
+  }
+  
+  input {
+    flex: 1;
+    padding: 10px 12px;
+    font-size: 13px;
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px 0 0 6px;
+    color: #e0e0e0;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  
+  input:focus {
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05);
+  }
+  
+  input::placeholder {
+    color: #666666;
+  }
+  
+  button, .add-btn {
+    background: linear-gradient(135deg, #2a2a2a 0%, #3a3a3a 100%);
+    color: #ffffff;
+    border: none;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 13px;
+    transition: all 0.2s ease;
+    border-radius: 0 6px 6px 0;
+    outline: none;
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  button::before, .add-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: left 0.5s ease;
+  }
+  
+  button:hover::before, .add-btn:hover::before {
+    left: 100%;
+  }
+  
+  button:hover, .add-btn:hover {
+    background: linear-gradient(135deg, #3a3a3a 0%, #4a4a4a 100%);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transform: translateY(-1px);
+  }
+  
+  button:active, .add-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  }
+  
+  .empty-list {
+    padding: 20px 0;
+    text-align: center;
+    color: #666666;
+    font-size: 13px;
+    font-style: italic;
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
+  }
+  
+  .stat-item {
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+  
+  .stat-item:hover {
+    background: #222222;
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+  }
+  
+  .stat-number {
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 4px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  
+  .stat-label {
+    font-size: 11px;
+    color: #888888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+  }
+  
+  .activity-log {
+    max-height: 120px;
+    overflow-y: auto;
+    background: #1a1a1a;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 8px;
+  }
+  
+  .activity-log::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .activity-log::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 4px;
+  }
+  
+  .activity-log::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+  }
+  
+  .activity-item {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    border-radius: 6px;
+    margin-bottom: 4px;
+    transition: background 0.2s;
+  }
+  
+  .activity-item:hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
+  
+  .activity-item:last-child {
+    margin-bottom: 0;
+  }
+  
+  .activity-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    font-size: 12px;
+  }
+  
+  .activity-icon.safe {
+    background: rgba(52, 168, 83, 0.2);
+    color: #34a853;
+  }
+  
+  .activity-icon.warning {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+  }
+  
+  .activity-icon.danger {
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+  }
+  
+  .activity-details {
+    flex: 1;
+  }
+  
+  .activity-text {
+    font-size: 12px;
+    color: #e0e0e0;
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+  
+  .activity-time {
+    font-size: 10px;
+    color: #666666;
+  }
+  
+  .footer {
+    padding: 10px 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 11px;
+    color: #666666;
+    text-align: center;
+    background: #0a0a0a;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <h2>Virtuālais Krāpnieks</h2>
+      <p class="header-subtitle">Alpha Virtuālais Krāpnieks</p>
+    </div>
+    <div class="status-indicator"></div>
+  </header>
+  
+  <div class="tabs">
+    <div class="tab active" data-tab="main">Dashboard</div>
+    <div class="tab" data-tab="list">Protection Lists</div>
+  </div>
+  
+  <div id="panel-main" class="panel active">
+    <div class="toggle">
+      <label>
+        <input type="checkbox" id="enableToggle" />
+        Active Protection
+      </label>
+    </div>
+    
+    <div class="stats-container">
+      <h4><i class="fas fa-chart-bar"></i>Protection Statistics</h4>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-number" id="threatsBlocked">0</div>
+          <div class="stat-label">Threats Blocked</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="sitesScanned">0</div>
+          <div class="stat-label">Sites Scanned</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="trustedDomains">0</div>
+          <div class="stat-label">Trusted Domains</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="blockedDomains">0</div>
+          <div class="stat-label">Blocked Domains</div>
+        </div>
+      </div>
+      
+      <h4 style="margin-top: 24px;"><i class="fas fa-history"></i>Recent Activity</h4>
+      <div class="activity-log" id="activityLog">
+        <div class="activity-item">
+          <div class="activity-icon safe">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <div class="activity-details">
+            <div class="activity-text">Protection enabled</div>
+            <div class="activity-time">Just now</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div id="panel-list" class="panel">
+    <h4><i class="fas fa-shield-check"></i>Trusted Domains</h4>
+    <div id="whitelist" class="list">
+      <div class="empty-list">No domains added</div>
+    </div>
+    <div class="input-group">
+      <input id="wl-input" placeholder="Enter domain (e.g., example.com)" />
+      <button class="add-btn" id="add-wl"><i class="fas fa-plus"></i> Add</button>
+    </div>
+    
+    <h4><i class="fas fa-ban"></i>Blocked Domains</h4>
+    <div id="blacklist" class="list">
+      <div class="empty-list">No domains added</div>
+    </div>
+    <div class="input-group">
+      <input id="bl-input" placeholder="Enter domain (e.g., example.com)" />
+      <button class="add-btn" id="add-bl"><i class="fas fa-plus"></i> Add</button>
+    </div>
+  </div>
+  
+  <div class="footer">
+    Virtuālais Krāpnieks v1.2.0 • © 2025 JTTehnikums.LV
+  </div>
+  
+<script src="popup.js"></script>
+</body>
+</html>

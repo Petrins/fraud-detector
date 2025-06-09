@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "Fraud Detector",
+  "version": "1.0.3",
+  "permissions": [
+    "storage",
+    "scripting",
+    "activeTab",
+    "webRequest"
+  ],
+  "host_permissions": [
+    "https://mail.google.com/*",
+    "https://www.virustotal.com/*",
+    "https://*/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://mail.google.com/*",
+        "https://mail.google.com/mail/*"
+      ],
+      "js": [
+        "contentScript.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["images/exclamation.png", "images/insurance.png", "images/caution.png"],
+      "matches": ["https://mail.google.com/*"]
+    }
+  ]
+}
